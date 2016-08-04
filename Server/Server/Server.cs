@@ -1,8 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using Utils;
 
 namespace Server
@@ -17,14 +15,9 @@ namespace Server
         private TcpListener Listener { get; set; }
 
         /// <summary>
-        /// A server side client interface we can use to send data to a remote
+        /// Our interface to the single client we are supporting for now
         /// </summary>
-        private TcpClient Client { get; set; }
-
-        /// <summary>
-        /// Communications interface
-        /// </summary>
-        public Comms Comms { get; set; }
+        public Comms ClientComms { get; private set; }
 
         /// <summary>
         /// Determines whether we have clients connected
@@ -37,8 +30,6 @@ namespace Server
         {
             Listener = new TcpListener(IPAddress.Any, 1490);
             Listener.Start();
-
-            Comms = new Comms();
 
             ListenForNewClient();
         }
@@ -57,8 +48,8 @@ namespace Server
         /// <param name="asyncResult"></param>
         private void AcceptClient(IAsyncResult asyncResult)
         {
-            Client = Listener.EndAcceptTcpClient(asyncResult);
-            Connections = true;
+            ClientComms = new Comms(Listener.EndAcceptTcpClient(asyncResult));
+            Console.WriteLine("Client accepted");
 
             ListenForNewClient();
         }

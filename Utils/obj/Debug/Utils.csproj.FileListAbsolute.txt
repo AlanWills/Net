@@ -3,3 +3,8 @@ C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Utils\Utils\bin\Debug\Ut
 C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Utils\Utils\obj\Debug\Utils.csprojResolveAssemblyReference.cache
 C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Utils\Utils\obj\Debug\Utils.dll
 C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Utils\Utils\obj\Debug\Utils.pdb
+C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Utils\bin\Debug\Utils.dll
+C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Utils\bin\Debug\Utils.pdb
+C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Utils\obj\Debug\Utils.csprojResolveAssemblyReference.cache
+C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Utils\obj\Debug\Utils.dll
+C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Utils\obj\Debug\Utils.pdb

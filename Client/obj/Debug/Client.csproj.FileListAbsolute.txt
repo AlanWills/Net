@@ -4,3 +4,9 @@ C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Client\bin\Debug\Client.
 C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Client\obj\Debug\Client.exe
 C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Client\obj\Debug\Client.pdb
 C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Client\obj\Debug\Client.csprojResolveAssemblyReference.cache
+C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Client\bin\Debug\Utils.dll
+C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Client\bin\Debug\Utils.pdb
+C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Client\bin\Debug\Client.exe.manifest
+C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Client\bin\Debug\Client.application
+C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Client\obj\Debug\Client.exe.manifest
+C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Client\obj\Debug\Client.application

@@ -1,4 +1,4 @@
-﻿using System.Threading;
+﻿using System;
 
 namespace Server
 {
@@ -6,17 +6,11 @@ namespace Server
     {
         static void Main(string[] args)
         {
-            int i = 0;
             Server server = new Server();
 
             while (true)
             {
-                if (server.Connections)
-                {
-                    server.SendData(i.ToString());
-                    Thread.Sleep(1000);
-                    i++;
-                }
+                server.ClientComms.Send(Console.ReadLine());
             }
         }
     }

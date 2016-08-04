@@ -1,4 +1,6 @@
-﻿namespace Client
+﻿using System;
+
+namespace Client
 {
     class Program
     {
@@ -7,7 +9,7 @@
             Client client = new Client();
             while (true)
             {
-
+                client.ServerComms.Send(Console.ReadLine());
             }
         }
     }
