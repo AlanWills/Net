@@ -1,0 +1,4 @@
+C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Utils\bin\Release\Utils.dll
+C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Utils\bin\Release\Utils.pdb
+C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Utils\obj\Release\Utils.dll
+C:\Users\Alan\Documents\Visual Studio 2015\Projects\Net\Utils\obj\Release\Utils.pdb

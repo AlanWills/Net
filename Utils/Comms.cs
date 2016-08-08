@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
+using static Utils.Delegates;
 
 namespace Utils
 {
@@ -23,6 +24,16 @@ namespace Utils
         /// Useful buffer for reading packeted messages from the server
         /// </summary>
         private byte[] ReadBuffer { get; set; }
+
+        /// <summary>
+        /// An event that is fired when this Comms receives a message
+        /// </summary>
+        public event OnDataReceived OnDataReceived;
+
+        /// <summary>
+        /// An event that is fired when this Comms can no longer communicate with the client sending it messages
+        /// </summary>
+        public event OnDisconnect OnDisconnect;
 
         #endregion
 
@@ -81,7 +92,14 @@ namespace Utils
         /// </summary>
         private void StartListening()
         {
-            Client.GetStream().BeginRead(ReadBuffer, 0, 2048, StreamReceived, null);
+            try
+            {
+                Client.GetStream().BeginRead(ReadBuffer, 0, 2048, StreamReceived, null);
+            }
+            catch
+            {
+                OnDisconnect?.Invoke();
+            }
         }
 
         /// <summary>
@@ -109,9 +127,7 @@ namespace Utils
                 data[i] = ReadBuffer[i];
             }
 
-            string text = Encoding.UTF8.GetString(data);
-            text = text.Trim();
-            Console.WriteLine(text);
+            OnDataReceived?.Invoke(data);
 
             //Listen for new data
             StartListening();
