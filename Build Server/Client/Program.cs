@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Client
+namespace BuildServerClient
 {
     class Program
     {
@@ -10,7 +10,9 @@ namespace Client
             
             while (true)
             {
-                client.ServerComms.Send(Console.ReadLine());
+                Console.WriteLine("Ready");
+                string message = Console.ReadLine();
+                client.ServerComms.Send(message);
             }
         }
     }
