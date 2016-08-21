@@ -26,9 +26,10 @@ namespace Utils
                 ServerComms.OnDataReceived += OnMessageReceived;
                 ServerComms.OnDisconnect += OnServerDisconnect;
             }
-            catch
+            catch (Exception e)
             {
                 Console.WriteLine("Connection failed");
+                Console.WriteLine(e.Message);
             }
         }
 

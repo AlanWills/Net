@@ -7,7 +7,7 @@ namespace BuildServerClient
     public class Client : BaseClient
     {
         public Client() :
-            base("192.168.0.10")
+            base("192.168.0.30")
         {
 
         }
