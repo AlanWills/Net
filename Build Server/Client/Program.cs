@@ -6,6 +6,7 @@ namespace BuildServerClient
     {
         static void Main(string[] args)
         {
+            Console.Title = "Build Server Client";
             Client client = new Client();
             
             while (true)

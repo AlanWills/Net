@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 using Utils;
 
 namespace BuildServerClient
@@ -7,7 +6,7 @@ namespace BuildServerClient
     public class Client : BaseClient
     {
         public Client() :
-            base("192.168.0.30")
+            base("192.168.0.10")
         {
 
         }
@@ -20,7 +19,7 @@ namespace BuildServerClient
         /// <param name="data"></param>
         protected override void OnMessageReceived(byte[] data)
         {
-            Console.WriteLine(Encoding.UTF8.GetString(data));
+            Console.WriteLine(data.ConvertToString());
         }
 
         protected override void OnServerDisconnect()

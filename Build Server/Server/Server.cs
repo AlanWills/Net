@@ -19,29 +19,53 @@ namespace BuildServer
             {
                 ClientComms.Send("Build request confirmed");
 
-                TestProject(_2DEngineTestPath, "2DEngineUnitTestGameProject.exe", Read2DEngineLogAndEmail);
+                TestProject("CelesteEngine", Read2DEngineLogAndSendMessage);
             }
         }
 
         /// <summary>
-        /// Opens the custom monogame project made with our framework, runs the tests and then when the process has finished, reads the log file and emails the results
+        /// Clones the repository, runs the tests and then when the process has finished, reads the log file and emails the results
         /// </summary>
         /// <param name="projectDirectoryPath"></param>
         /// <param name="projectExeName"></param>
-        private void TestProject(string projectDirectoryPath, string projectExeName, EventHandler logAndEmailEvent)
+        private void TestProject(string projectGithubRepoName, EventHandler logAndEmailEvent)
         {
-            using (Process proc = Process.Start(Path.Combine(projectDirectoryPath, @"bin\Windows\x86\Debug", projectExeName)))
+            ProcessStartInfo gitInfo = new ProcessStartInfo();
+            gitInfo.CreateNoWindow = true;
+            gitInfo.RedirectStandardError = true;
+            gitInfo.RedirectStandardOutput = true;
+            gitInfo.UseShellExecute = false;
+            gitInfo.FileName = @"C:\Program Files\Git\bin\git.exe";
+            gitInfo.Arguments = "clone https://github.com/AlanWills/" + projectGithubRepoName + ".git " + projectGithubRepoName;
+            gitInfo.WorkingDirectory = Directory.GetCurrentDirectory();
+
+            Process gitProcess = new Process();
+            gitProcess.StartInfo = gitInfo;
+            gitProcess.Disposed += logAndEmailEvent;
+            gitProcess.Start();
+
+            Console.WriteLine(gitProcess.StandardError.ReadToEnd());
+            Console.WriteLine(gitProcess.StandardOutput.ReadToEnd());
+            Console.WriteLine("Checkout completed");
+
+            // Delete the repo - we should do this after testing but for now do it here to clean up
+            DirectoryInfo directory = new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), projectGithubRepoName));
+
+            // Git files are funny and we have to change the access level
+            foreach (FileInfo file in new DirectoryInfo(Path.Combine(directory.FullName, ".git")).GetFiles(".", SearchOption.AllDirectories))
             {
-                proc.Disposed += logAndEmailEvent;
+                File.SetAttributes(file.FullName, FileAttributes.Normal);
             }
+
+            Directory.Delete(directory.FullName, true);
         }
 
         /// <summary>
-        /// Reads the log file for the 2D Engine and emails the result
+        /// Reads the log file for the Celeste Engine and either sends back the result or emails the result
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Read2DEngineLogAndEmail(object sender, EventArgs e)
+        private void Read2DEngineLogAndSendMessage(object sender, EventArgs e)
         {
             StringBuilder fileContents = new StringBuilder();
             foreach (string line in File.ReadLines(Path.Combine(_2DEngineTestPath, "TestResults", "TestResults.txt")))
@@ -49,31 +73,38 @@ namespace BuildServer
                 fileContents.AppendLine(line);
             }
 
-            Email(fileContents);
+            Message(fileContents);
         }
 
         /// <summary>
-        /// Emails the inputted string in the string builder to me
+        /// Either sends back via comms or emails the inputted string in the string builder to me if there is no connection
         /// </summary>
         /// <param name="testRunInformation"></param>
-        private void Email(StringBuilder testRunInformation)
+        private void Message(StringBuilder testRunInformation)
         {
             DateTime buildCompleteTime = DateTime.Now;
 
             testRunInformation.AppendLine();
             testRunInformation.Append("Build Request completed at " + buildCompleteTime.ToShortTimeString());
 
-            MailMessage mail = new MailMessage("alawills@googlemail.com", "alawills@googlemail.com");
-            SmtpClient client = new SmtpClient("smtp.gmail.com", 587);
+            try
+            {
+                ClientComms.Send(testRunInformation.ToString());
+            }
+            catch
+            {
+                MailMessage mail = new MailMessage("alawills@googlemail.com", "alawills@googlemail.com");
+                SmtpClient client = new SmtpClient("smtp.gmail.com", 587);
 
-            mail.Subject = "Build Request";
-            mail.Body = testRunInformation.ToString();
+                mail.Subject = "Build Request";
+                mail.Body = testRunInformation.ToString();
 
-            client.Port = 587;
-            client.Credentials = new System.Net.NetworkCredential("alawills", "favouriteprimes111929");
-            client.EnableSsl = true;
+                client.Port = 587;
+                client.Credentials = new System.Net.NetworkCredential("alawills", "favouriteprimes111929");
+                client.EnableSsl = true;
 
-            client.Send(mail);
+                client.Send(mail);
+            }
 
             Console.WriteLine("Testing run complete");
         }
