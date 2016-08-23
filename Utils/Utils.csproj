@@ -45,6 +45,7 @@
     <Compile Include="Comms.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="ExtensionFunctions.cs" />
+    <Compile Include="CmdLineUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -9,8 +9,6 @@ namespace BuildServer
 {
     public class Server : BaseServer
     {
-        private const string _2DEngineTestPath = @"C:\Users\Alan\Documents\Visual Studio 2015\Projects\2DEngine\2DEngineUnitTestGameProject";
-
         protected override void ProcessMessage(byte[] data)
         {
             base.ProcessMessage(data);
@@ -30,22 +28,10 @@ namespace BuildServer
         /// <param name="projectExeName"></param>
         private void TestProject(string projectGithubRepoName, EventHandler logAndEmailEvent)
         {
-            ProcessStartInfo gitInfo = new ProcessStartInfo();
-            gitInfo.CreateNoWindow = true;
-            gitInfo.RedirectStandardError = true;
-            gitInfo.RedirectStandardOutput = true;
-            gitInfo.UseShellExecute = false;
-            gitInfo.FileName = @"C:\Program Files\Git\bin\git.exe";
-            gitInfo.Arguments = "clone https://github.com/AlanWills/" + projectGithubRepoName + ".git " + projectGithubRepoName;
-            gitInfo.WorkingDirectory = Directory.GetCurrentDirectory();
+            Tuple<string, string> clone = CmdLineUtils.PerformCommand("clone https://github.com/AlanWills/" + projectGithubRepoName + ".git " + projectGithubRepoName);
 
-            Process gitProcess = new Process();
-            gitProcess.StartInfo = gitInfo;
-            gitProcess.Disposed += logAndEmailEvent;
-            gitProcess.Start();
-
-            Console.WriteLine(gitProcess.StandardError.ReadToEnd());
-            Console.WriteLine(gitProcess.StandardOutput.ReadToEnd());
+            Console.WriteLine(clone.Item1);
+            Console.WriteLine(clone.Item2);
             Console.WriteLine("Checkout completed");
 
             // Delete the repo - we should do this after testing but for now do it here to clean up
@@ -68,7 +54,7 @@ namespace BuildServer
         private void Read2DEngineLogAndSendMessage(object sender, EventArgs e)
         {
             StringBuilder fileContents = new StringBuilder();
-            foreach (string line in File.ReadLines(Path.Combine(_2DEngineTestPath, "TestResults", "TestResults.txt")))
+            foreach (string line in File.ReadLines(Path.Combine(Directory.GetCurrentDirectory(), "TestResults", "TestResults.txt")))
             {
                 fileContents.AppendLine(line);
             }
