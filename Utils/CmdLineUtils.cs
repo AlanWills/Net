@@ -9,62 +9,22 @@ namespace Utils
     /// </summary>
     public static class CmdLineUtils
     {
-        /// <summary>
-        /// Execute's a git command with arguments in a windowless process.
-        /// Can provide a callback which will be run after the process is complete.
-        /// Returns a tuple where the first element is the std error output and the second element is the std output.
-        /// Example call would have arguments ("status") or ("clone https://github.com/AlanWills/Repo.git")
-        /// </summary>
-        /// <param name="commandAndArgs"></param>
-        /// <param name="onCommandCompleteCallback"></param>
-        /// <returns></returns>
-        public static Tuple<string, string> PerformGitCommand(string commandAndArgs, EventHandler onCommandCompleteCallback = null)
-        {
-            ProcessStartInfo gitInfo = CreateCmdLineProcessStartInfo(commandAndArgs);
-            gitInfo.FileName = @"C:\Program Files (x86)\Git\cmd\git.exe";
-
-            Process gitProcess = new Process();
-            gitProcess.StartInfo = gitInfo;
-            
-            if (onCommandCompleteCallback != null)
-            {
-                gitProcess.Disposed += onCommandCompleteCallback;
-            }
-
-            gitProcess.Start();
-
-            string stdError = gitProcess.StandardError.ReadToEnd();
-            string stdOut = gitProcess.StandardOutput.ReadToEnd();
-
-            return new Tuple<string, string>(stdError, stdOut);
-        }
+        public static string Git = @"C:\Program Files (x86)\Git\cmd\git.exe";
+        public static string MSBuild = @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe";
 
         /// <summary>
         /// Executes a windows command prompt command in a windowless process.
         /// Can provide a callback which will be run after the process is complete.
-        /// Returns a tuple where the first element is the std error output and the second element is the std output.
+        /// Asynchronously prints out the standard error and standard output to the Console.
         /// </summary>
         /// <param name="commandAndArgs"></param>
         /// <param name="onCommandCompleteCallback"></param>
         /// <returns></returns>
-        public static Tuple<string, string> PerformCommand(string commandAndArgs, EventHandler onCommandCompleteCallback = null)
+        public static void PerformCommand(string fileName, string commandAndArgs, EventHandler onCommandCompleteCallback = null)
         {
             ProcessStartInfo cmdInfo = CreateCmdLineProcessStartInfo(commandAndArgs);
-
-            Process process = new Process();
-            process.StartInfo = cmdInfo;
-
-            if (onCommandCompleteCallback != null)
-            {
-                process.Disposed += onCommandCompleteCallback;
-            }
-
-            process.Start();
-
-            string stdError = process.StandardError.ReadToEnd();
-            string stdOut = process.StandardOutput.ReadToEnd();
-
-            return new Tuple<string, string>(stdError, stdOut);
+            cmdInfo.FileName = fileName;
+            RunProcess(cmdInfo, onCommandCompleteCallback);
         }
 
         /// <summary>
@@ -84,6 +44,34 @@ namespace Utils
             cmdInfo.WorkingDirectory = Directory.GetCurrentDirectory();
 
             return cmdInfo;
+        }
+
+        /// <summary>
+        /// Creates a process which outputs error and output asynchronously to the standard output and will block until complete.
+        /// </summary>
+        /// <param name="processInfo"></param>
+        /// <param name="onCommandCompleteCallback"></param>
+        private static void RunProcess(ProcessStartInfo processInfo, EventHandler onCommandCompleteCallback)
+        {
+            Process process = new Process();
+            process.StartInfo = processInfo;
+
+            if (onCommandCompleteCallback != null)
+            {
+                process.Disposed += onCommandCompleteCallback;
+            }
+
+            process.Start();
+            process.BeginErrorReadLine();
+            process.BeginOutputReadLine();
+
+            process.WaitForExit();
+            process.Close();
+        }
+
+        private static void PrintToCommandLine(object sender, DataReceivedEventArgs e)
+        {
+            Console.WriteLine(e.Data);
         }
     }
 }

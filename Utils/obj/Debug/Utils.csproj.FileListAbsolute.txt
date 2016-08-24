@@ -15,3 +15,4 @@ C:\Users\alawi\Documents\Visual Studio 2015\Projects\Net\Utils\bin\Debug\Utils.p
 C:\Users\alawi\Documents\Visual Studio 2015\Projects\Net\Utils\obj\Debug\Utils.csprojResolveAssemblyReference.cache
 C:\Users\alawi\Documents\Visual Studio 2015\Projects\Net\Utils\obj\Debug\Utils.dll
 C:\Users\alawi\Documents\Visual Studio 2015\Projects\Net\Utils\obj\Debug\Utils.pdb
+C:\Users\Alan Wills\Documents\Visual Studio 2012\Projects\Net\Utils\obj\Debug\Utils.csprojResolveAssemblyReference.cache

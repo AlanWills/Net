@@ -17,7 +17,7 @@ namespace BuildServer
             {
                 ClientComms.Send("Build request confirmed");
 
-                TestProject("CelesteEngine", Read2DEngineLogAndSendMessage);
+                TestProject("CelesteEngine", "CelesteEngineTestProject", Read2DEngineLogAndSendMessage);
             }
         }
 
@@ -28,15 +28,11 @@ namespace BuildServer
         /// <param name="projectExeName"></param>
         private void TestProject(string projectGithubRepoName, string testProjectName, EventHandler logAndMessageEvent)
         {
-            Tuple<string, string> clone = CmdLineUtils.PerformGitCommand("clone https://github.com/AlanWills/" + projectGithubRepoName + ".git " + projectGithubRepoName);
-            Console.WriteLine(clone.Item1);
-            Console.WriteLine(clone.Item2);
+            CmdLineUtils.PerformCommand(CmdLineUtils.Git, "clone https://github.com/AlanWills/" + projectGithubRepoName + ".git " + projectGithubRepoName);
             Console.WriteLine("Checkout completed");
 
-            string solutionToBuildPath = Path.Combine(projectGithubRepoName, testProjectName) + ".sln";
-            Tuple<string, string> build = CmdLineUtils.PerformCommand(@"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe " + solutionToBuildPath);
-            Console.WriteLine(build.Item1);
-            Console.WriteLine(build.Item2);
+            string pathToSolution = Path.Combine(projectGithubRepoName, testProjectName) + ".sln";
+            CmdLineUtils.PerformCommand(CmdLineUtils.MSBuild, pathToSolution);
 
             // Start the test project and wait for it to close
             string processPath = Path.Combine(Directory.GetCurrentDirectory(), projectGithubRepoName, projectGithubRepoName, @"bin\Windows\x86\Debug", testProjectName + ".exe");
