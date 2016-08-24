@@ -26,15 +26,28 @@ namespace BuildServer
         /// </summary>
         /// <param name="projectDirectoryPath"></param>
         /// <param name="projectExeName"></param>
-        private void TestProject(string projectGithubRepoName, EventHandler logAndEmailEvent)
+        private void TestProject(string projectGithubRepoName, string testProjectName, EventHandler logAndMessageEvent)
         {
-            Tuple<string, string> clone = CmdLineUtils.PerformCommand("clone https://github.com/AlanWills/" + projectGithubRepoName + ".git " + projectGithubRepoName);
-
+            Tuple<string, string> clone = CmdLineUtils.PerformGitCommand("clone https://github.com/AlanWills/" + projectGithubRepoName + ".git " + projectGithubRepoName);
             Console.WriteLine(clone.Item1);
             Console.WriteLine(clone.Item2);
             Console.WriteLine("Checkout completed");
 
-            // Delete the repo - we should do this after testing but for now do it here to clean up
+            string solutionToBuildPath = Path.Combine(projectGithubRepoName, testProjectName) + ".sln";
+            Tuple<string, string> build = CmdLineUtils.PerformCommand(@"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe " + solutionToBuildPath);
+            Console.WriteLine(build.Item1);
+            Console.WriteLine(build.Item2);
+
+            // Start the test project and wait for it to close
+            string processPath = Path.Combine(Directory.GetCurrentDirectory(), projectGithubRepoName, projectGithubRepoName, @"bin\Windows\x86\Debug", testProjectName + ".exe");
+            Process proc = Process.Start(processPath);
+            proc.WaitForExit();
+            proc.Close();
+
+            // Send the results
+            logAndMessageEvent.Invoke(this, EventArgs.Empty);
+
+            // Clean up all of the files we have checked out
             DirectoryInfo directory = new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), projectGithubRepoName));
 
             // Git files are funny and we have to change the access level
@@ -94,129 +107,5 @@ namespace BuildServer
 
             Console.WriteLine("Testing run complete");
         }
-
-        // Start using UnitTestFramework and move this to a helper function for invoking all MS unit tests
-
-        //private void TestAssembly(string dllFullPath)
-        //{
-        //    DateTime buildRequestTime = DateTime.Now;
-
-        //    Assembly assembly = Assembly.Load(dllFullPath);
-        //    Celeste.Cel.ScriptDirectoryPath = @"C:\Users\Alan\Documents\Visual Studio 2015\Projects\Celeste\Celeste-master\Celeste\TestCeleste\Scripts";
-
-        //    // Turn off asserts
-        //    Trace.Listeners.Clear();
-
-        //    List<string> passedTests = new List<string>();
-        //    List<string> failedTests = new List<string>();
-
-        //    foreach (Type type in assembly.GetExportedTypes())
-        //    {
-        //        if (type.IsAbstract) { continue; }
-
-        //        List<MethodInfo> methods = new List<MethodInfo>(type.GetMethods());
-
-        //        MethodInfo classInitialiseFunction = methods.Find(x => x.GetCustomAttribute<ClassInitializeAttribute>() != null);
-        //        MethodInfo testInitialiseFunction = methods.Find(x => x.GetCustomAttribute<TestInitializeAttribute>() != null);
-        //        MethodInfo testCleanupFunction = methods.Find(x => x.GetCustomAttribute<TestCleanupAttribute>() != null);
-        //        MethodInfo classCleanupFunction = methods.Find(x => x.GetCustomAttribute<ClassCleanupAttribute>() != null);
-
-        //        object testedClass = Activator.CreateInstance(type);
-
-        //        if (type.GetCustomAttribute<TestClassAttribute>() != null)
-        //        {
-        //            if (classInitialiseFunction != null)
-        //            {
-        //                try
-        //                {
-        //                    classInitialiseFunction.Invoke(testedClass, null);
-        //                }
-        //                catch { continue; }
-        //            }
-
-        //            foreach (MethodInfo method in methods)
-        //            {
-        //                if (method.GetCustomAttribute<TestMethodAttribute>() != null)
-        //                {
-        //                    if (testInitialiseFunction != null)
-        //                    {
-        //                        try
-        //                        {
-        //                            testInitialiseFunction.Invoke(testedClass, null);
-        //                        }
-        //                        catch { continue; }
-        //                    }
-
-        //                    try
-        //                    {
-        //                        method.Invoke(testedClass, null);
-        //                        passedTests.Add(method.Name);
-        //                    }
-        //                    catch (Exception e)
-        //                    {
-        //                        failedTests.Add(method.Name);
-        //                    }
-
-        //                    if (testCleanupFunction != null)
-        //                    {
-        //                        try
-        //                        {
-        //                            testCleanupFunction.Invoke(testedClass, null);
-        //                        }
-        //                        catch { continue; }
-        //                    }
-        //                }
-        //            }
-
-        //            if (classCleanupFunction != null)
-        //            {
-        //                try
-        //                {
-        //                    classCleanupFunction.Invoke(testedClass, null);
-        //                }
-        //                catch { continue; }
-        //            }
-        //        }
-        //    }
-
-        //    DateTime buildCompleteTime = DateTime.Now;
-
-        //    StringBuilder messageBody = new StringBuilder();
-        //    messageBody.AppendLine("Build Request completed at " + buildCompleteTime.ToShortTimeString());
-        //    messageBody.AppendLine();
-        //    messageBody.AppendLine(failedTests.Count.ToString() + " tests failed");
-        //    messageBody.AppendLine(passedTests.Count.ToString() + " tests passed");
-        //    messageBody.AppendLine();
-        //    messageBody.AppendLine("Failed Tests:");
-        //    messageBody.AppendLine();
-
-        //    foreach (string failedTest in failedTests)
-        //    {
-        //        messageBody.AppendLine(failedTest);
-        //    }
-
-        //    messageBody.AppendLine();
-        //    messageBody.AppendLine("Passed Tests:");
-        //    messageBody.AppendLine();
-
-        //    foreach (string passedTest in passedTests)
-        //    {
-        //        messageBody.AppendLine(passedTest);
-        //    }
-
-        //    MailMessage mail = new MailMessage("alawills@googlemail.com", "alawills@googlemail.com");
-        //    SmtpClient client = new SmtpClient("smtp.gmail.com", 587);
-
-        //    mail.Subject = "Build Request " + buildRequestTime.ToShortTimeString();
-        //    mail.Body = messageBody.ToString();
-
-        //    client.Port = 587;
-        //    client.Credentials = new System.Net.NetworkCredential("alawills", "favouriteprimes111929");
-        //    client.EnableSsl = true;
-
-        //    client.Send(mail);
-
-        //    Console.WriteLine("Testing run complete");
-        //}
     }
 }
