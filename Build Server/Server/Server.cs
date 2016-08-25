@@ -9,6 +9,8 @@ namespace BuildServer
 {
     public class Server : BaseServer
     {
+        private const string UnitTestFrameworkRepoName = "MonoGameUnitTestFramework";
+
         protected override void ProcessMessage(byte[] data)
         {
             base.ProcessMessage(data);
@@ -17,7 +19,14 @@ namespace BuildServer
             {
                 ClientComms.Send("Build request confirmed");
 
+                // Check out the monogame unit test framework
+                CmdLineUtils.PerformCommand(CmdLineUtils.Git, "clone https://github.com/AlanWills/" + UnitTestFrameworkRepoName + ".git");
+                Console.WriteLine("Checkout of test framework completed");
+
                 TestProject("CelesteEngine", "CelesteEngineTestProject", Read2DEngineLogAndSendMessage);
+
+                // Delete the monogame unit test framework
+                DeleteGitRepo(Path.Combine(Directory.GetCurrentDirectory(), UnitTestFrameworkRepoName));
             }
         }
 
@@ -29,7 +38,7 @@ namespace BuildServer
         private void TestProject(string projectGithubRepoName, string testProjectName, EventHandler logAndMessageEvent)
         {
             CmdLineUtils.PerformCommand(CmdLineUtils.Git, "clone https://github.com/AlanWills/" + projectGithubRepoName + ".git " + projectGithubRepoName);
-            Console.WriteLine("Checkout completed");
+            Console.WriteLine("Checkout of " + projectGithubRepoName + " completed");
 
             string pathToSolution = Path.Combine(projectGithubRepoName, testProjectName) + ".sln";
             CmdLineUtils.PerformCommand(CmdLineUtils.MSBuild, pathToSolution);
@@ -44,15 +53,7 @@ namespace BuildServer
             logAndMessageEvent.Invoke(this, EventArgs.Empty);
 
             // Clean up all of the files we have checked out
-            DirectoryInfo directory = new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), projectGithubRepoName));
-
-            // Git files are funny and we have to change the access level
-            foreach (FileInfo file in new DirectoryInfo(Path.Combine(directory.FullName, ".git")).GetFiles(".", SearchOption.AllDirectories))
-            {
-                File.SetAttributes(file.FullName, FileAttributes.Normal);
-            }
-
-            Directory.Delete(directory.FullName, true);
+            DeleteGitRepo(Path.Combine(Directory.GetCurrentDirectory(), projectGithubRepoName));
         }
 
         /// <summary>
@@ -102,6 +103,23 @@ namespace BuildServer
             }
 
             Console.WriteLine("Testing run complete");
+        }
+
+        /// <summary>
+        /// Git files require special permissions to delete, so this function just wraps up all of that functionality
+        /// </summary>
+        /// <param name="folderFullPath"></param>
+        private void DeleteGitRepo(string folderFullPath)
+        {
+            DirectoryInfo directory = new DirectoryInfo(folderFullPath);
+
+            // Git files are funny and we have to change the access level
+            foreach (FileInfo file in new DirectoryInfo(Path.Combine(directory.FullName, ".git")).GetFiles(".", SearchOption.AllDirectories))
+            {
+                File.SetAttributes(file.FullName, FileAttributes.Normal);
+            }
+
+            Directory.Delete(directory.FullName, true);
         }
     }
 }
