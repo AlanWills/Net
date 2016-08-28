@@ -9,8 +9,6 @@ namespace BuildServer
 {
     public class Server : BaseServer
     {
-        private const string UnitTestFrameworkRepoName = "MonoGameUnitTestFramework";
-
         protected override void ProcessMessage(byte[] data)
         {
             base.ProcessMessage(data);
@@ -19,14 +17,7 @@ namespace BuildServer
             {
                 ClientComms.Send("Build request confirmed");
 
-                // Check out the monogame unit test framework
-                CmdLineUtils.PerformCommand(CmdLineUtils.Git, "clone https://github.com/AlanWills/" + UnitTestFrameworkRepoName + ".git");
-                Console.WriteLine("Checkout of test framework completed");
-
-                TestProject("CelesteEngine", "CelesteEngineTestProject", Read2DEngineLogAndSendMessage);
-
-                // Delete the monogame unit test framework
-                DeleteGitRepo(Path.Combine(Directory.GetCurrentDirectory(), UnitTestFrameworkRepoName));
+                TestProject("CelesteEngine", "CelesteEngineUnitTestProject", Read2DEngineLogAndSendMessage);
             }
         }
 
@@ -37,10 +28,15 @@ namespace BuildServer
         /// <param name="projectExeName"></param>
         private void TestProject(string projectGithubRepoName, string testProjectName, EventHandler logAndMessageEvent)
         {
+            if (Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), projectGithubRepoName)))
+            {
+                DeleteGitRepo(Path.Combine(Directory.GetCurrentDirectory(), projectGithubRepoName));
+            }
+
             CmdLineUtils.PerformCommand(CmdLineUtils.Git, "clone https://github.com/AlanWills/" + projectGithubRepoName + ".git " + projectGithubRepoName);
             Console.WriteLine("Checkout of " + projectGithubRepoName + " completed");
 
-            string pathToSolution = Path.Combine(projectGithubRepoName, testProjectName) + ".sln";
+            string pathToSolution = Path.Combine(projectGithubRepoName, testProjectName, testProjectName) + ".csproj";
             CmdLineUtils.PerformCommand(CmdLineUtils.MSBuild, pathToSolution);
 
             // Start the test project and wait for it to close

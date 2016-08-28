@@ -2,7 +2,7 @@
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
-using Utils.Delegates;
+using static Utils.Delegates;
 
 namespace Utils
 {

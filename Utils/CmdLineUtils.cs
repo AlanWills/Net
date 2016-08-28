@@ -9,7 +9,7 @@ namespace Utils
     /// </summary>
     public static class CmdLineUtils
     {
-        public static string Git = @"C:\Program Files (x86)\Git\cmd\git.exe";
+        public static string Git = @"C:\Program Files\Git\bin\git.exe";
         public static string MSBuild = @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe";
 
         /// <summary>
@@ -55,6 +55,8 @@ namespace Utils
         {
             Process process = new Process();
             process.StartInfo = processInfo;
+            process.ErrorDataReceived += PrintToCommandLine;
+            process.OutputDataReceived += PrintToCommandLine;
 
             if (onCommandCompleteCallback != null)
             {
